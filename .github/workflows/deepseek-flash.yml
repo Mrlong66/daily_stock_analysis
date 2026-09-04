@@ -15,41 +15,17 @@ jobs:
           RESP=$(curl -sS https://api.edgefn.net/v1/chat/completions \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $EDGEFN_API_KEY" \
-            -d '{"model":"DeepSeek-V4-Flash","messages":[{"role":"user","content":"你好,一句话介绍自己"}],"max_tokens":100}')
+            -d '{"model":"DeepSeek-V4-Flash","messages":[{"role":"user","content":"你好"}],"max_tokens":100}')
           echo "$RESP"
-          # 提取模型回复内容,失败时给出原文
-          CONTENT=$(echo "$RESP" | jq -r '.choices[0].message.content // ("调用失败:" + tostring)')
+          CONTENT=$(echo "$RESP" | jq -r '.choices[0].message.content // "调用失败"')
           echo "reply=$CONTENT" >> $GITHUB_OUTPUT
 
-      # ========== 通知渠道(选一个,删掉其他的)==========
-      # ① 企业微信
       - name: 企业微信通知
         if: always()
         env:
           WEBHOOK: ${{ secrets.WECOM_WEBHOOK }}
           REPLY: ${{ steps.call.outputs.reply }}
         run: |
-          PAYLOAD=$(jq -n --arg c "DeepSeek测试结果:
-状态:${{ job.status }}
+          PAYLOAD=$(jq -n --arg c "DeepSeek测试:${{ job.status }}
 回复:$REPLY" '{"msgtype":"text","text":{"content":$c}}')
           curl -sS "$WEBHOOK" -H "Content-Type: application/json" -d "$PAYLOAD"
-
-      # ② 微信(Server酱)—— 需要 Secret: SERVERCHAN_KEY
-      # - name: 微信通知
-      #   if: always()
-      #   env:
-      #     KEY: ${{ secrets.SERVERCHAN_KEY }}
-      #     REPLY: ${{ steps.call.outputs.reply }}
-      #   run: |
-      #     curl -sS "https://sctapi.ftqq.com/${KEY}.send" \
-      #       --data-urlencode "title=DeepSeek测试${{ job.status }}" \
-      #       --data-urlencode "desp=$REPLY"
-
-      # ③ Bark(iOS)—— 需要 Secret: BARK_KEY
-      # - name: Bark通知
-      #   if: always()
-      #   env:
-      #     KEY: ${{ secrets.BARK_KEY }}
-      #     REPLY: ${{ steps.call.outputs.reply }}
-      #   run: |
-      #     curl -sS "https://api.day.app/${KEY}/DeepSeek测试${{ job.status }}/$(echo $REPLY | cut -c1-50)"
