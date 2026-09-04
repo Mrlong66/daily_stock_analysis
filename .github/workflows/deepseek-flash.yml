@@ -24,8 +24,7 @@ jobs:
         if: always()
         env:
           WEBHOOK: ${{ secrets.WECOM_WEBHOOK }}
-          REPLY: ${{ steps.call.outputs.reply }}
         run: |
-          PAYLOAD=$(jq -n --arg c "DeepSeek测试:${{ job.status }}
-回复:$REPLY" '{"msgtype":"text","text":{"content":$c}}')
-          curl -sS "$WEBHOOK" -H "Content-Type: application/json" -d "$PAYLOAD"
+          curl -sS "$WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d '{"msgtype":"text","text":{"content":"DeepSeek测试:${{ job.status }}"}}'
