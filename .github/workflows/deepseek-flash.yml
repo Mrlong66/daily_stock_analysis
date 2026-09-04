@@ -8,17 +8,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 调用模型
-        id: call
         env:
           EDGEFN_API_KEY: ${{ secrets.EDGEFN_API_KEY }}
         run: |
-          RESP=$(curl -sS https://api.edgefn.net/v1/chat/completions \
+          curl -sS https://api.edgefn.net/v1/chat/completions \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $EDGEFN_API_KEY" \
-            -d '{"model":"DeepSeek-V4-Flash","messages":[{"role":"user","content":"你好"}],"max_tokens":100}')
-          echo "$RESP"
-          CONTENT=$(echo "$RESP" | jq -r '.choices[0].message.content // "调用失败"')
-          echo "reply=$CONTENT" >> $GITHUB_OUTPUT
+            -d '{"model":"DeepSeek-V4-Flash","messages":[{"role":"user","content":"你好"}],"max_tokens":100}'
 
       - name: 企业微信通知
         if: always()
