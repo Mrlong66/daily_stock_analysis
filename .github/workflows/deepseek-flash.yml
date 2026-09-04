@@ -1,0 +1,23 @@
+name: DeepSeek-V4-Flash Test
+
+on:
+  workflow_dispatch:    # 手动触发,点 Run workflow 即可测试
+
+jobs:
+  call-model:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 调用 DeepSeek-V4-Flash
+        env:
+          EDGEFN_API_KEY: ${{ secrets.EDGEFN_API_KEY }}   # ← 自动引用你刚建的 Secret
+        run: |
+          curl -sS https://api.edgefn.net/v1/chat/completions \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $EDGEFN_API_KEY" \
+            -d '{
+              "model": "DeepSeek-V4-Flash",
+              "messages": [
+                {"role": "user", "content": "你好,请用一句话介绍你自己"}
+              ],
+              "max_tokens": 200
+            }'
