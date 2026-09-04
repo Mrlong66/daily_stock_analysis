@@ -10,17 +10,10 @@ jobs:
       - name: 调用模型
         env:
           EDGEFN_API_KEY: ${{ secrets.EDGEFN_API_KEY }}
-        run: |
-          curl -sS https://api.edgefn.net/v1/chat/completions \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $EDGEFN_API_KEY" \
-            -d '{"model":"DeepSeek-V4-Flash","messages":[{"role":"user","content":"你好"}],"max_tokens":100}'
+        run: curl -sS https://api.edgefn.net/v1/chat/completions -H "Content-Type: application/json" -H "Authorization: Bearer $EDGEFN_API_KEY" -d '{"model":"DeepSeek-V4-Flash","messages":[{"role":"user","content":"你好"}],"max_tokens":100}'
 
       - name: 企业微信通知
         if: always()
         env:
           WEBHOOK: ${{ secrets.WECOM_WEBHOOK }}
-        run: |
-          curl -sS "$WEBHOOK" \
-            -H "Content-Type: application/json" \
-            -d '{"msgtype":"text","text":{"content":"DeepSeek测试:${{ job.status }}"}}'
+        run: curl -sS "$WEBHOOK" -H "Content-Type: application/json" -d '{"msgtype":"text","text":{"content":"DeepSeek测试:${{ job.status }}"}}'
